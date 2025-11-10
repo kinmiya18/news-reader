@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const https = require('https');
 const News = require('../models/news.model');
 
 const axiosInstance = axios.create({
@@ -281,7 +282,6 @@ class NewsService {
       return null;
     }
   }
-
 
   async getLatestNews(page = 1, limit = 12) {
     try {
