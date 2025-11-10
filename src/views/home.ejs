@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Tin tức mới nhất</h1>
+    </div>
+    
+    <% if (news && news.length > 0) { %>
+        <% news.forEach(item => { %>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <% if (item.thumbnail) { %>
+                        <img src="<%= getImageProxyUrl(item.thumbnail) %>" class="card-img-top" alt="<%= item.title %>">
+                    <% } %>
+                    <div class="card-body">
+                        <h5 class="card-title"><%= item.title %></h5>
+                        <p class="card-text"><%= item.summary %></p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <%= new Date(item.publishedAt).toLocaleDateString('vi-VN') %>
+                            </small>
+                            <a href="/news/detail/<%= item._id %>" class="btn btn-primary">Đọc tiếp</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+
+        <%- include('partials/pagination') %>
+    <% } else { %>
+        <div class="col-12">
+            <p>Không có tin tức nào.</p>
+        </div>
+    <% } %>
+</div>

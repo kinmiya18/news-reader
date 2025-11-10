@@ -1,0 +1,57 @@
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <% if (news) { %>
+            <article>
+                <header class="mb-4">
+                    <h1 class="fw-bolder mb-1"><%= news.title %></h1>
+                    <div class="text-muted fst-italic mb-2">
+                        Đăng ngày <%= new Date(news.publishedAt).toLocaleDateString('vi-VN') %>
+                        | Nguồn: <%= news.source %>
+                        | Lượt xem: <%= news.views %>
+                    </div>
+                    <% if (news.category) { %>
+                        <a class="badge bg-secondary text-decoration-none link-light" href="/news/category/<%= news.category %>">
+                            <%= news.category %>
+                        </a>
+                    <% } %>
+                </header>
+
+                <% if (news.thumbnail) { %>
+                    <figure class="mb-4">
+                        <img class="img-fluid rounded" src="<%= getImageProxyUrl(news.thumbnail) %>" alt="<%= news.title %>">
+                    </figure>
+                <% } %>
+
+                <section class="mb-5">
+                    <%- news.content %>
+                </section>
+
+                <footer class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="<%= news.sourceUrl %>" target="_blank" class="btn btn-primary">
+                            Xem bài gốc
+                        </a>
+                        <div class="share-buttons">
+                            <!-- Facebook -->
+                            <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(news.sourceUrl) %>" 
+                               target="_blank" 
+                               class="btn btn-outline-primary">
+                                Chia sẻ Facebook
+                            </a>
+                            <!-- Twitter -->
+                            <a href="https://twitter.com/intent/tweet?url=<%= encodeURIComponent(news.sourceUrl) %>&text=<%= encodeURIComponent(news.title) %>" 
+                               target="_blank" 
+                               class="btn btn-outline-info">
+                                Chia sẻ Twitter
+                            </a>
+                        </div>
+                    </div>
+                </footer>
+            </article>
+        <% } else { %>
+            <div class="alert alert-danger">
+                Không tìm thấy bài viết
+            </div>
+        <% } %>
+    </div>
+</div>

@@ -1,0 +1,981 @@
+<!doctype html>
+<html lang="vi">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Reader - Giao diện đọc báo điện tử</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.6;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Navigation */
+    .navbar {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-decoration: none;
+    }
+
+    .logo-accent {
+      color: #2563eb;
+    }
+
+    .nav-categories {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      color: #4b5563;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #2563eb;
+    }
+
+    .search-icon {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      color: #4b5563;
+    }
+
+    /* View Toggle */
+    .view-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 32px 0;
+    }
+
+    .toggle-btn {
+      padding: 10px 24px;
+      border: 1px solid #e5e5e5;
+      background-color: #ffffff;
+      color: #4b5563;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background-color: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+
+    .toggle-btn:hover:not(.active) {
+      border-color: #2563eb;
+      color: #2563eb;
+    }
+
+    /* Homepage View */
+    .homepage {
+      padding: 40px 0;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+    }
+
+    .featured-article {
+      background-color: #f9fafb;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 48px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      padding: 32px;
+    }
+
+    .featured-image {
+      background-color: #e5e7eb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+    }
+
+    .featured-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .category-badge {
+      display: inline-block;
+      background-color: #2563eb;
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .featured-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #1a1a1a;
+      line-height: 1.3;
+    }
+
+    .featured-excerpt {
+      font-size: 16px;
+      color: #4b5563;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .article-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .read-more {
+      display: inline-block;
+      background-color: #2563eb;
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background-color 0.2s;
+      align-self: flex-start;
+    }
+
+    .read-more:hover {
+      background-color: #1d4ed8;
+    }
+
+    /* Articles Grid */
+    .articles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .article-card {
+      background-color: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .article-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .article-image {
+      background-color: #e5e7eb;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .article-body {
+      padding: 20px;
+    }
+
+    .article-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+      line-height: 1.4;
+    }
+
+    .article-excerpt {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Article Detail View */
+    .article-detail {
+      padding: 40px 0;
+      display: none;
+    }
+
+    .article-detail.active {
+      display: block;
+    }
+
+    .article-header {
+      max-width: 800px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+
+    .article-detail-title {
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+      line-height: 1.2;
+    }
+
+    .article-detail-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-size: 15px;
+      color: #6b7280;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .share-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .share-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid #e5e5e5;
+      background-color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .share-btn:hover {
+      background-color: #2563eb;
+      border-color: #2563eb;
+      color: #ffffff;
+    }
+
+    .article-content-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .article-main-content {
+      max-width: 800px;
+    }
+
+    .article-featured-image {
+      background-color: #e5e7eb;
+      border-radius: 12px;
+      height: 400px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .article-text {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #374151;
+      margin-bottom: 24px;
+    }
+
+    .article-text p {
+      margin-bottom: 20px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+    }
+
+    .sidebar-section {
+      background-color: #f9fafb;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #1a1a1a;
+    }
+
+    .related-article {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .related-article:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .related-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .related-title:hover {
+      color: #2563eb;
+    }
+
+    .related-meta {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    /* Comments Section */
+    .comments-section {
+      max-width: 800px;
+      margin: 48px auto 0;
+      padding-top: 48px;
+      border-top: 2px solid #e5e5e5;
+    }
+
+    .comments-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+    }
+
+    .comment-form {
+      background-color: #f9fafb;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .comment-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 15px;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+
+    .comment-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 15px;
+      min-height: 100px;
+      margin-bottom: 12px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    .submit-comment {
+      background-color: #2563eb;
+      color: #ffffff;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .submit-comment:hover {
+      background-color: #1d4ed8;
+    }
+
+    .comment {
+      background-color: #ffffff;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .comment-text {
+      color: #4b5563;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* Search Modal */
+    .search-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 100px;
+    }
+
+    .search-modal.active {
+      display: flex;
+    }
+
+    .search-content {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 18px;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    .close-search {
+      position: absolute;
+      top: 60px;
+      right: 60px;
+      background-color: #ffffff;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .nav-categories {
+        display: none;
+      }
+
+      .featured-article {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+
+      .featured-title {
+        font-size: 24px;
+      }
+
+      .articles-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .article-detail-title {
+        font-size: 28px;
+      }
+
+      .article-content-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .article-text {
+        font-size: 16px;
+      }
+
+      .close-search {
+        top: 20px;
+        right: 20px;
+      }
+    }
+
+    /* Icon styles */
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body><!-- Navigation -->
+  <nav class="navbar">
+   <div class="container">
+    <div class="nav-content"><a href="#" class="logo" id="logo-text"> <span class="logo-accent">News</span>Reader </a>
+     <div class="nav-categories"><a href="#" class="nav-link">Thời sự</a> <a href="#" class="nav-link">Công nghệ</a> <a href="#" class="nav-link">Kinh doanh</a> <a href="#" class="nav-link">Giải trí</a> <a href="#" class="nav-link">Thể thao</a>
+     </div>
+     <div class="search-icon" onclick="openSearch()">
+      <svg fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+     </div>
+    </div>
+   </div>
+  </nav><!-- View Toggle -->
+  <div class="container">
+   <div class="view-toggle"><button class="toggle-btn active" onclick="showHomepage()">Trang chủ</button> <button class="toggle-btn" onclick="showArticleDetail()">Chi tiết bài viết</button>
+   </div>
+  </div><!-- Homepage View -->
+  <div class="homepage active" id="homepage">
+   <div class="container"><!-- Featured Article -->
+    <h2 class="section-title">Bài viết nổi bật</h2>
+    <div class="featured-article">
+     <div class="featured-image">
+      <svg width="80" height="80" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+      </svg>
+     </div>
+     <div class="featured-content"><span class="category-badge">Công nghệ</span>
+      <h1 class="featured-title" id="featured-title">Trí tuệ nhân tạo đang thay đổi cách chúng ta làm việc</h1>
+      <p class="featured-excerpt" id="featured-excerpt">Khám phá những xu hướng mới nhất trong lĩnh vực AI và cách chúng đang tác động đến các ngành công nghiệp trên toàn thế giới.</p>
+      <div class="article-meta"><span>📝 Nguyễn Văn A</span> <span>📅 15/01/2024</span> <span>⏱️ 5 phút đọc</span>
+      </div><a href="#" class="read-more">Đọc tiếp</a>
+     </div>
+    </div><!-- Latest Articles -->
+    <h2 class="section-title">Bài viết mới nhất</h2>
+    <div class="articles-grid">
+     <div class="article-card">
+      <div class="article-image">
+       <svg width="60" height="60" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+       </svg>
+      </div>
+      <div class="article-body"><span class="category-badge">Kinh doanh</span>
+       <h3 class="article-title">Startup Việt Nam gọi vốn thành công 10 triệu USD</h3>
+       <p class="article-excerpt">Một startup công nghệ tại Việt Nam vừa hoàn tất vòng gọi vốn Series A với mức định giá ấn tượng...</p>
+       <div class="article-meta"><span>📅 14/01/2024</span> <span>⏱️ 3 phút</span>
+       </div>
+      </div>
+     </div>
+     <div class="article-card">
+      <div class="article-image">
+       <svg width="60" height="60" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+       </svg>
+      </div>
+      <div class="article-body"><span class="category-badge">Thể thao</span>
+       <h3 class="article-title">Đội tuyển Việt Nam chuẩn bị cho giải đấu lớn</h3>
+       <p class="article-excerpt">HLV trưởng công bố danh sách 23 cầu thủ tham dự giải đấu quan trọng sắp tới...</p>
+       <div class="article-meta"><span>📅 14/01/2024</span> <span>⏱️ 4 phút</span>
+       </div>
+      </div>
+     </div>
+     <div class="article-card">
+      <div class="article-image">
+       <svg width="60" height="60" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+       </svg>
+      </div>
+      <div class="article-body"><span class="category-badge">Giải trí</span>
+       <h3 class="article-title">Phim Việt giành giải thưởng quốc tế</h3>
+       <p class="article-excerpt">Bộ phim mới nhất của đạo diễn nổi tiếng vừa được vinh danh tại liên hoan phim...</p>
+       <div class="article-meta"><span>📅 13/01/2024</span> <span>⏱️ 6 phút</span>
+       </div>
+      </div>
+     </div>
+     <div class="article-card">
+      <div class="article-image">
+       <svg width="60" height="60" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+       </svg>
+      </div>
+      <div class="article-body"><span class="category-badge">Thời sự</span>
+       <h3 class="article-title">Chính phủ công bố chính sách mới hỗ trợ doanh nghiệp</h3>
+       <p class="article-excerpt">Gói hỗ trợ trị giá hàng tỷ đồng nhằm thúc đẩy phát triển kinh tế trong năm mới...</p>
+       <div class="article-meta"><span>📅 13/01/2024</span> <span>⏱️ 5 phút</span>
+       </div>
+      </div>
+     </div>
+     <div class="article-card">
+      <div class="article-image">
+       <svg width="60" height="60" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+       </svg>
+      </div>
+      <div class="article-body"><span class="category-badge">Công nghệ</span>
+       <h3 class="article-title">Xu hướng công nghệ nổi bật năm 2024</h3>
+       <p class="article-excerpt">Các chuyên gia dự đoán những công nghệ sẽ bùng nổ và thay đổi cuộc sống...</p>
+       <div class="article-meta"><span>📅 12/01/2024</span> <span>⏱️ 7 phút</span>
+       </div>
+      </div>
+     </div>
+     <div class="article-card">
+      <div class="article-image">
+       <svg width="60" height="60" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+       </svg>
+      </div>
+      <div class="article-body"><span class="category-badge">Kinh doanh</span>
+       <h3 class="article-title">Thị trường chứng khoán tăng trưởng mạnh</h3>
+       <p class="article-excerpt">VN-Index vượt mốc kỷ lục với dòng tiền mạnh từ nhà đầu tư nước ngoài...</p>
+       <div class="article-meta"><span>📅 12/01/2024</span> <span>⏱️ 4 phút</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Article Detail View -->
+  <div class="article-detail" id="article-detail">
+   <div class="container">
+    <div class="article-header"><span class="category-badge">Công nghệ</span>
+     <h1 class="article-detail-title" id="article-detail-title">Trí tuệ nhân tạo đang thay đổi cách chúng ta làm việc và sống</h1>
+     <div class="article-detail-meta"><span>📝 <span id="article-author">Nguyễn Văn A</span></span> <span>📅 15/01/2024</span> <span>⏱️ 5 phút đọc</span> <span>👁️ 1,234 lượt xem</span>
+     </div>
+     <div class="share-buttons"><button class="share-btn" title="Chia sẻ Facebook">
+       <svg fill="currentColor" viewbox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
+       </svg></button> <button class="share-btn" title="Chia sẻ Twitter">
+       <svg fill="currentColor" viewbox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
+       </svg></button> <button class="share-btn" title="Sao chép liên kết">
+       <svg fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+       </svg></button>
+     </div>
+    </div>
+    <div class="article-content-wrapper">
+     <div class="article-main-content">
+      <div class="article-featured-image">
+       <svg width="100" height="100" fill="none" stroke="#9ca3af" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+       </svg>
+      </div>
+      <div class="article-text">
+       <p>Trí tuệ nhân tạo (AI) không còn là khái niệm xa vời trong các bộ phim khoa học viễn tưởng. Ngày nay, AI đã trở thành một phần không thể thiếu trong cuộc sống hàng ngày của chúng ta, từ các trợ lý ảo trên điện thoại thông minh đến các hệ thống gợi ý trên các nền tảng mạng xã hội.</p>
+       <p>Trong lĩnh vực kinh doanh, AI đang tạo ra những thay đổi mang tính cách mạng. Các công ty đang sử dụng machine learning để phân tích dữ liệu khách hàng, tối ưu hóa chuỗi cung ứng và cải thiện trải nghiệm người dùng. Theo một nghiên cứu gần đây, hơn 80% các doanh nghiệp lớn đã triển khai ít nhất một giải pháp AI trong hoạt động của mình.</p>
+       <p>Tuy nhiên, sự phát triển nhanh chóng của AI cũng đặt ra nhiều câu hỏi về đạo đức và tác động xã hội. Làm thế nào để đảm bảo AI được sử dụng một cách có trách nhiệm? Chúng ta cần chuẩn bị gì cho một tương lai nơi AI đóng vai trò ngày càng quan trọng?</p>
+       <p>Các chuyên gia cho rằng giáo dục và đào tạo là chìa khóa. Chúng ta cần trang bị cho thế hệ trẻ những kỹ năng cần thiết để làm việc cùng với AI, đồng thời phát triển các khung pháp lý để quản lý việc sử dụng công nghệ này.</p>
+       <p>Nhìn về tương lai, AI hứa hẹn sẽ mang lại nhiều đột phá hơn nữa trong các lĩnh vực như y tế, giáo dục và năng lượng. Thách thức của chúng ta là đảm bảo rằng những tiến bộ này mang lại lợi ích cho toàn xã hội, không chỉ một số ít người.</p>
+      </div><!-- Comments Section -->
+      <div class="comments-section">
+       <h3 class="comments-title">Bình luận (3)</h3>
+       <div class="comment-form"><input type="text" class="comment-input" placeholder="Tên của bạn"> <textarea class="comment-textarea" placeholder="Viết bình luận của bạn..."></textarea> <button class="submit-comment">Gửi bình luận</button>
+       </div>
+       <div class="comment">
+        <div class="comment-author">
+         Trần Thị B • 2 giờ trước
+        </div>
+        <div class="comment-text">
+         Bài viết rất hay và có nhiều thông tin hữu ích. Cảm ơn tác giả đã chia sẻ!
+        </div>
+       </div>
+       <div class="comment">
+        <div class="comment-author">
+         Lê Văn C • 5 giờ trước
+        </div>
+        <div class="comment-text">
+         AI thực sự đang thay đổi mọi thứ. Tôi đã thấy tác động của nó trong công việc hàng ngày của mình.
+        </div>
+       </div>
+       <div class="comment">
+        <div class="comment-author">
+         Phạm Thị D • 1 ngày trước
+        </div>
+        <div class="comment-text">
+         Rất mong có thêm nhiều bài viết về chủ đề này. Đây là xu hướng quan trọng mà mọi người cần quan tâm.
+        </div>
+       </div>
+      </div>
+     </div><!-- Sidebar -->
+     <aside class="sidebar">
+      <div class="sidebar-section">
+       <h3 class="sidebar-title">Bài viết liên quan</h3>
+       <div class="related-article">
+        <div class="related-title">
+         Machine Learning cơ bản cho người mới bắt đầu
+        </div>
+        <div class="related-meta">
+         📅 14/01/2024 • ⏱️ 6 phút
+        </div>
+       </div>
+       <div class="related-article">
+        <div class="related-title">
+         Tương lai của tự động hóa trong doanh nghiệp
+        </div>
+        <div class="related-meta">
+         📅 13/01/2024 • ⏱️ 5 phút
+        </div>
+       </div>
+       <div class="related-article">
+        <div class="related-title">
+         Đạo đức trong phát triển AI
+        </div>
+        <div class="related-meta">
+         📅 12/01/2024 • ⏱️ 7 phút
+        </div>
+       </div>
+       <div class="related-article">
+        <div class="related-title">
+         ChatGPT và cuộc cách mạng chatbot
+        </div>
+        <div class="related-meta">
+         📅 11/01/2024 • ⏱️ 4 phút
+        </div>
+       </div>
+      </div>
+      <div class="sidebar-section">
+       <h3 class="sidebar-title">Danh mục phổ biến</h3>
+       <div class="related-article">
+        <div class="related-title">
+         🔧 Công nghệ
+        </div>
+       </div>
+       <div class="related-article">
+        <div class="related-title">
+         💼 Kinh doanh
+        </div>
+       </div>
+       <div class="related-article">
+        <div class="related-title">
+         ⚽ Thể thao
+        </div>
+       </div>
+       <div class="related-article">
+        <div class="related-title">
+         🎬 Giải trí
+        </div>
+       </div>
+      </div>
+     </aside>
+    </div>
+   </div>
+  </div><!-- Search Modal -->
+  <div class="search-modal" id="search-modal" onclick="closeSearchOnBackdrop(event)"><button class="close-search" onclick="closeSearch()">✕</button>
+   <div class="search-content"><input type="text" class="search-input" placeholder="Tìm kiếm bài viết..." autofocus>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      site_name: 'NewsReader',
+      tagline: 'Tin tức cập nhật mỗi ngày',
+      featured_title: 'Trí tuệ nhân tạo đang thay đổi cách chúng ta làm việc',
+      featured_excerpt: 'Khám phá những xu hướng mới nhất trong lĩnh vực AI và cách chúng đang tác động đến các ngành công nghiệp trên toàn thế giới.',
+      article_title: 'Trí tuệ nhân tạo đang thay đổi cách chúng ta làm việc và sống',
+      article_author: 'Nguyễn Văn A',
+      background_color: '#ffffff',
+      accent_color: '#2563eb',
+      text_color: '#1a1a1a',
+      font_family: 'Inter',
+      font_size: 16
+    };
+
+    async function onConfigChange(config) {
+      const siteName = config.site_name || defaultConfig.site_name;
+      const featuredTitle = config.featured_title || defaultConfig.featured_title;
+      const featuredExcerpt = config.featured_excerpt || defaultConfig.featured_excerpt;
+      const articleTitle = config.article_title || defaultConfig.article_title;
+      const articleAuthor = config.article_author || defaultConfig.article_author;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+
+      const logoElement = document.getElementById('logo-text');
+      if (logoElement) {
+        logoElement.innerHTML = `<span class="logo-accent">${siteName.split(' ')[0] || 'News'}</span>${siteName.split(' ').slice(1).join(' ') || 'Reader'}`;
+      }
+
+      const featuredTitleElement = document.getElementById('featured-title');
+      if (featuredTitleElement) {
+        featuredTitleElement.textContent = featuredTitle;
+      }
+
+      const featuredExcerptElement = document.getElementById('featured-excerpt');
+      if (featuredExcerptElement) {
+        featuredExcerptElement.textContent = featuredExcerpt;
+      }
+
+      const articleDetailTitleElement = document.getElementById('article-detail-title');
+      if (articleDetailTitleElement) {
+        articleDetailTitleElement.textContent = articleTitle;
+      }
+
+      const articleAuthorElement = document.getElementById('article-author');
+      if (articleAuthorElement) {
+        articleAuthorElement.textContent = articleAuthor;
+      }
+
+      document.body.style.backgroundColor = backgroundColor;
+      document.body.style.color = textColor;
+      document.body.style.fontFamily = `${fontFamily}, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      document.body.style.fontSize = `${fontSize}px`;
+
+      const accentElements = document.querySelectorAll('.logo-accent, .category-badge, .read-more, .toggle-btn.active, .submit-comment');
+      accentElements.forEach(el => {
+        el.style.backgroundColor = accentColor;
+      });
+
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+          this.style.color = accentColor;
+        });
+        link.addEventListener('mouseleave', function() {
+          this.style.color = '#4b5563';
+        });
+      });
+    }
+
+    function showHomepage() {
+      document.getElementById('homepage').style.display = 'block';
+      document.getElementById('article-detail').style.display = 'none';
+      document.querySelectorAll('.toggle-btn')[0].classList.add('active');
+      document.querySelectorAll('.toggle-btn')[1].classList.remove('active');
+    }
+
+    function showArticleDetail() {
+      document.getElementById('homepage').style.display = 'none';
+      document.getElementById('article-detail').style.display = 'block';
+      document.querySelectorAll('.toggle-btn')[0].classList.remove('active');
+      document.querySelectorAll('.toggle-btn')[1].classList.add('active');
+    }
+
+    function openSearch() {
+      document.getElementById('search-modal').classList.add('active');
+    }
+
+    function closeSearch() {
+      document.getElementById('search-modal').classList.remove('active');
+    }
+
+    function closeSearchOnBackdrop(event) {
+      if (event.target.id === 'search-modal') {
+        closeSearch();
+      }
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['site_name', config.site_name || defaultConfig.site_name],
+          ['tagline', config.tagline || defaultConfig.tagline],
+          ['featured_title', config.featured_title || defaultConfig.featured_title],
+          ['featured_excerpt', config.featured_excerpt || defaultConfig.featured_excerpt],
+          ['article_title', config.article_title || defaultConfig.article_title],
+          ['article_author', config.article_author || defaultConfig.article_author]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99c6802c269d1f2b',t:'MTc2Mjc4NzY3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

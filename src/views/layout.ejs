@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Đọc tin tức mới nhất từ các nguồn đáng tin cậy">
+    <title>News Reader - Tin tức mới nhất</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">News Reader</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'thoi-su' ? 'active' : '' %>" href="/news/category/thoi-su">Thời sự</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'the-gioi' ? 'active' : '' %>" href="/news/category/the-gioi">Thế giới</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'kinh-doanh' ? 'active' : '' %>" href="/news/category/kinh-doanh">Kinh doanh</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'giai-tri' ? 'active' : '' %>" href="/news/category/giai-tri">Giải trí</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'the-thao' ? 'active' : '' %>" href="/news/category/the-thao">Thể thao</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'khoa-hoc' ? 'active' : '' %>" href="/news/category/khoa-hoc">Khoa học</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'suc-khoe' ? 'active' : '' %>" href="/news/category/suc-khoe">Sức khỏe</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'phap-luat' ? 'active' : '' %>" href="/news/category/phap-luat">Pháp luật</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'du-lich' ? 'active' : '' %>" href="/news/category/du-lich">Du lịch</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <%= locals.category === 'oto-xe-may' ? 'active' : '' %>" href="/news/category/oto-xe-may">Ô tô - Xe máy</a>
+                    </li>
+                </ul>
+                <form class="d-flex ms-auto" action="/news/search" method="GET">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Tìm kiếm tin tức...">
+                    <button class="btn btn-outline-light" type="submit">Tìm kiếm</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <%- body %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>News Reader</h5>
+                    <p>Đọc tin tức mới nhất từ các nguồn đáng tin cậy.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p>&copy; 2025 News Reader. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading indicator -->
+    <div id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/locale/vi.js"></script>
+    <script src="/js/image-proxy.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>
