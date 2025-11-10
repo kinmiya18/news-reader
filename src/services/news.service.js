@@ -2,6 +2,41 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const News = require('../models/news.model');
 
+const axiosInstance = axios.create({
+  timeout: 15000,
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate',  // Loại bỏ 'br' để tránh lỗi 406
+    'Connection': 'keep-alive',
+    'Referer': 'https://vnexpress.net/',
+    'DNT': '1',
+  },
+  httpAgent: new http.Agent({ keepAlive: true, maxSockets: 50 }),
+  httpsAgent: new https.Agent({ keepAlive: true, maxSockets: 50 }),
+});
+
+// Thêm retry logic cho 4xx, 5xx errors
+axiosInstance.interceptors.response.use(
+  response => response,
+  async error => {
+    const config = error.config;
+    if (!config || !config.retry) {
+      config.retry = 0;
+    }
+    config.retry += 1;
+
+    // Retry tối đa 3 lần với delay tăng dần
+    if (config.retry <= 3 && (error.response?.status === 406 || error.response?.status >= 500)) {
+      const delay = config.retry * 1000;
+      console.log(`  Retrying (${config.retry}/3) after ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return axiosInstance(config);
+    }
+    return Promise.reject(error);
+  }
+);
 class NewsService {
   constructor() {
     this.categories = [
@@ -246,6 +281,7 @@ class NewsService {
       return null;
     }
   }
+
 
   async getLatestNews(page = 1, limit = 12) {
     try {
