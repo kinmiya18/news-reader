@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const https = require('https');
+const http = require('http');
 const News = require('../models/news.model');
 
 const axiosInstance = axios.create({
